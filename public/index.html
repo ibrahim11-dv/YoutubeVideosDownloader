@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader Pro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(220, 38, 127, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(239, 68, 68, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            background: rgba(31, 41, 55, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 650px;
+            padding: 40px;
+            text-align: center;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(17, 24, 39, 0.8);
+            border: 2px solid rgba(75, 85, 99, 0.3);
+            border-radius: 16px;
+            color: #f9fafb;
+            font-size: 16px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+        
+        .section-title {
+            color: #e5e7eb;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        
+        .format-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+        
+        .format-option {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .format-option input {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .format-card {
+            background: rgba(17, 24, 39, 0.6);
+            border: 2px solid rgba(75, 85, 99, 0.3);
+            border-radius: 12px;
+            padding: 16px 12px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .format-option input:checked + .format-card {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            transform: translateY(-2px);
+        }
+        
+        .format-title {
+            color: #f9fafb;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .format-desc {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+            margin: 8px;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4);
+        }
+        
+        .video-info {
+            margin-top: 24px;
+            padding: 20px;
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            border-radius: 16px;
+            display: none;
+            text-align: left;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .video-info img {
+            width: 100%;
+            max-width: 320px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .video-title {
+            color: #f9fafb;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .video-duration {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        
+        .loader {
+            display: none;
+            width: 40px;
+            height: 40px;
+            margin: 24px auto;
+            border: 3px solid rgba(75, 85, 99, 0.3);
+            border-top: 3px solid #ef4444;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .clear-btn {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 18px;
+            display: none;
+        }
+        
+        .input-container {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="input-container">
+            <input type="text" id="urlInput" placeholder="Paste YouTube URL here...">
+            <button class="clear-btn" id="clearBtn">×</button>
+        </div>
+        
+        <div class="section-title">Choose Format & Quality</div>
+        <div class="format-grid">
+            <label class="format-option">
+                <input type="radio" name="format" value="mp3">
+                <div class="format-card">
+                    <div class="format-title">MP3</div>
+                    <div class="format-desc">Audio Only</div>
+                </div>
+            </label>
+            
+            <label class="format-option">
+                <input type="radio" name="format" value="360p">
+                <div class="format-card">
+                    <div class="format-title">360p</div>
+                    <div class="format-desc">Low Quality</div>
+                </div>
+            </label>
+            
+            <label class="format-option">
+                <input type="radio" name="format" value="480p">
+                <div class="format-card">
+                    <div class="format-title">480p</div>
+                    <div class="format-desc">Standard</div>
+                </div>
+            </label>
+            
+            <label class="format-option">
+                <input type="radio" name="format" value="720p" checked>
+                <div class="format-card">
+                    <div class="format-title">720p</div>
+                    <div class="format-desc">HD Quality</div>
+                </div>
+            </label>
+            
+            <label class="format-option">
+                <input type="radio" name="format" value="1080p">
+                <div class="format-card">
+                    <div class="format-title">1080p</div>
+                    <div class="format-desc">Full HD</div>
+                </div>
+            </label>
+            
+            <label class="format-option">
+                <input type="radio" name="format" value="highest">
+                <div class="format-card">
+                    <div class="format-title">Highest</div>
+                    <div class="format-desc">Best Available</div>
+                </div>
+            </label>
+        </div>
+        
+        <div id="downloadButtons">
+            <button class="download-btn" id="downloadBtn">Download Video</button>
+        </div>
+        
+        <div class="loader" id="loader"></div>
+        
+        <div class="video-info" id="videoInfo">
+            <img id="thumbnail" src="" alt="Video thumbnail">
+            <div class="video-title" id="videoTitle"></div>
+            <div class="video-duration" id="videoDuration"></div>
+        </div>
+    </div>
+
+    <script>
+        const urlInput = document.getElementById('urlInput');
+        const clearBtn = document.getElementById('clearBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const downloadButtons = document.getElementById('downloadButtons');
+        const loader = document.getElementById('loader');
+        const videoInfo = document.getElementById('videoInfo');
+        
+        let currentData = null;
+        let debounceTimer;
+        
+        // Clear input functionality
+        urlInput.addEventListener('input', function() {
+            clearBtn.style.display = this.value ? 'block' : 'none';
+        });
+        
+        clearBtn.addEventListener('click', function() {
+            urlInput.value = '';
+            clearBtn.style.display = 'none';
+            hideVideoInfo();
+        });
+        
+        urlInput.addEventListener('input', function() {
+            const url = this.value.trim();
+            clearTimeout(debounceTimer);
+            
+            if (!url) {
+                hideVideoInfo();
+                return;
+            }
+            
+            debounceTimer = setTimeout(() => {
+                if (url.includes('youtube') || url.includes('youtu.be')) {
+                    fetchInfo(url);
+                } else {
+                    hideVideoInfo();
+                }
+            }, 100);
+        });
+        
+        downloadBtn.addEventListener('click', function() {
+            const url = urlInput.value.trim();
+            const format = document.querySelector('input[name="format"]:checked').value;
+            
+            if (url) {
+                window.open(`/download?url=${encodeURIComponent(url)}&format=${format}`, '_blank');
+            }
+        });
+        
+        function fetchInfo(url) {
+            loader.style.display = 'block';
+            hideVideoInfo();
+            
+            fetch(`/info?url=${encodeURIComponent(url)}`)
+                .then(response => response.json())
+                .then(data => {
+                    loader.style.display = 'none';
+                    currentData = data;
+                    
+                    if (data.info) {
+                        showVideo(data.info);
+                    }
+                })
+                .catch(() => {
+                    loader.style.display = 'none';
+                    hideVideoInfo();
+                });
+        }
+        
+        function showVideo(info) {
+            document.getElementById('videoTitle').textContent = info.videoDetails.title;
+            
+            const duration = parseInt(info.videoDetails.lengthSeconds);
+            const minutes = Math.floor(duration / 60);
+            const seconds = duration % 60;
+            document.getElementById('videoDuration').textContent = `Duration: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('thumbnail').src = info.videoDetails.thumbnails[info.videoDetails.thumbnails.length - 1].url;
+            
+            downloadButtons.innerHTML = '<button class="download-btn" id="downloadBtn">Download Video</button>';
+            document.getElementById('downloadBtn').addEventListener('click', function() {
+                const format = document.querySelector('input[name="format"]:checked').value;
+                window.open(`/download?url=${encodeURIComponent(urlInput.value.trim())}&format=${format}`, '_blank');
+            });
+            
+            videoInfo.style.display = 'block';
+        }
+        
+        function hideVideoInfo() {
+            videoInfo.style.display = 'none';
+            downloadButtons.innerHTML = '<button class="download-btn" id="downloadBtn">Download Video</button>';
+        }
+    </script>
+</body>
+</html>
