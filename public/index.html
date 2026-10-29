@@ -1,383 +1,382 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark" data-color="bw">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Downloader Pro</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(220, 38, 127, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(239, 68, 68, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        .container {
-            background: rgba(31, 41, 55, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(75, 85, 99, 0.3);
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 650px;
-            padding: 40px;
-            text-align: center;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 16px 20px;
-            background: rgba(17, 24, 39, 0.8);
-            border: 2px solid rgba(75, 85, 99, 0.3);
-            border-radius: 16px;
-            color: #f9fafb;
-            font-size: 16px;
-            margin-bottom: 24px;
-            transition: all 0.3s ease;
-        }
-        
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #ef4444;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-        }
-        
-        .section-title {
-            color: #e5e7eb;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 16px;
-            text-align: left;
-        }
-        
-        .format-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-            margin-bottom: 32px;
-        }
-        
-        .format-option {
-            position: relative;
-            cursor: pointer;
-        }
-        
-        .format-option input {
-            position: absolute;
-            opacity: 0;
-        }
-        
-        .format-card {
-            background: rgba(17, 24, 39, 0.6);
-            border: 2px solid rgba(75, 85, 99, 0.3);
-            border-radius: 12px;
-            padding: 16px 12px;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-        
-        .format-option input:checked + .format-card {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: #ef4444;
-            transform: translateY(-2px);
-        }
-        
-        .format-title {
-            color: #f9fafb;
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-        
-        .format-desc {
-            color: #9ca3af;
-            font-size: 12px;
-        }
-        
-        .download-btn {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            border: none;
-            padding: 16px 32px;
-            border-radius: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
-            margin: 8px;
-        }
-        
-        .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4);
-        }
-        
-        .video-info {
-            margin-top: 24px;
-            padding: 20px;
-            background: rgba(17, 24, 39, 0.6);
-            border: 1px solid rgba(75, 85, 99, 0.3);
-            border-radius: 16px;
-            display: none;
-            text-align: left;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .video-info img {
-            width: 100%;
-            max-width: 320px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .video-title {
-            color: #f9fafb;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        .video-duration {
-            color: #9ca3af;
-            font-size: 14px;
-            margin-bottom: 16px;
-        }
-        
-        .loader {
-            display: none;
-            width: 40px;
-            height: 40px;
-            margin: 24px auto;
-            border: 3px solid rgba(75, 85, 99, 0.3);
-            border-top: 3px solid #ef4444;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .clear-btn {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #9ca3af;
-            cursor: pointer;
-            font-size: 18px;
-            display: none;
-        }
-        
-        .input-container {
-            position: relative;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YT-DECK // SWISS BRUTALIST MEDIA EXTRACTOR</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="input-container">
-            <input type="text" id="urlInput" placeholder="Paste YouTube URL here...">
-            <button class="clear-btn" id="clearBtn">×</button>
+  <div class="deck-shell">
+    <!-- Top Telemetry Bar -->
+    <header class="telemetry-bar">
+      <div class="telemetry-left">
+        <div class="status-pill">
+          <span class="led" id="engineLed"></span>
+          <span id="engineStatusText">INITIALIZING YT-DLP + FFMPEG...</span>
         </div>
-        
-        <div class="section-title">Choose Format & Quality</div>
-        <div class="format-grid">
-            <label class="format-option">
-                <input type="radio" name="format" value="mp3">
-                <div class="format-card">
-                    <div class="format-title">MP3</div>
-                    <div class="format-desc">Audio Only</div>
-                </div>
-            </label>
-            
-            <label class="format-option">
-                <input type="radio" name="format" value="360p">
-                <div class="format-card">
-                    <div class="format-title">360p</div>
-                    <div class="format-desc">Low Quality</div>
-                </div>
-            </label>
-            
-            <label class="format-option">
-                <input type="radio" name="format" value="480p">
-                <div class="format-card">
-                    <div class="format-title">480p</div>
-                    <div class="format-desc">Standard</div>
-                </div>
-            </label>
-            
-            <label class="format-option">
-                <input type="radio" name="format" value="720p" checked>
-                <div class="format-card">
-                    <div class="format-title">720p</div>
-                    <div class="format-desc">HD Quality</div>
-                </div>
-            </label>
-            
-            <label class="format-option">
-                <input type="radio" name="format" value="1080p">
-                <div class="format-card">
-                    <div class="format-title">1080p</div>
-                    <div class="format-desc">Full HD</div>
-                </div>
-            </label>
-            
-            <label class="format-option">
-                <input type="radio" name="format" value="highest">
-                <div class="format-card">
-                    <div class="format-title">Highest</div>
-                    <div class="format-desc">Best Available</div>
-                </div>
-            </label>
-        </div>
-        
-        <div id="downloadButtons">
-            <button class="download-btn" id="downloadBtn">Download Video</button>
-        </div>
-        
-        <div class="loader" id="loader"></div>
-        
-        <div class="video-info" id="videoInfo">
-            <img id="thumbnail" src="" alt="Video thumbnail">
-            <div class="video-title" id="videoTitle"></div>
-            <div class="video-duration" id="videoDuration"></div>
-        </div>
-    </div>
+        <span class="kbd-hint">[CTRL+V] GLOBAL PASTE</span>
+      </div>
+      <div class="telemetry-right">
+        <button type="button" class="mini-btn" id="batchModeBtn" title="Toggle multi-link batch mode">BATCH MODE: OFF</button>
+        <button type="button" class="mini-btn" id="colorModeBtn" title="Toggle raw B&W vs full color thumbnails">THUMB: B&amp;W RAW</button>
+        <button type="button" class="mini-btn" id="themeModeBtn" title="Switch dark industrial vs paper light theme">THEME: DARK</button>
+      </div>
+    </header>
 
-    <script>
-        const urlInput = document.getElementById('urlInput');
-        const clearBtn = document.getElementById('clearBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const downloadButtons = document.getElementById('downloadButtons');
-        const loader = document.getElementById('loader');
-        const videoInfo = document.getElementById('videoInfo');
-        
-        let currentData = null;
-        let debounceTimer;
-        
-        // Clear input functionality
-        urlInput.addEventListener('input', function() {
-            clearBtn.style.display = this.value ? 'block' : 'none';
-        });
-        
-        clearBtn.addEventListener('click', function() {
-            urlInput.value = '';
-            clearBtn.style.display = 'none';
-            hideVideoInfo();
-        });
-        
-        urlInput.addEventListener('input', function() {
-            const url = this.value.trim();
-            clearTimeout(debounceTimer);
-            
-            if (!url) {
-                hideVideoInfo();
-                return;
-            }
-            
-            debounceTimer = setTimeout(() => {
-                if (url.includes('youtube') || url.includes('youtu.be')) {
-                    fetchInfo(url);
-                } else {
-                    hideVideoInfo();
-                }
-            }, 100);
-        });
-        
-        downloadBtn.addEventListener('click', function() {
-            const url = urlInput.value.trim();
-            const format = document.querySelector('input[name="format"]:checked').value;
-            
-            if (url) {
-                window.open(`/download?url=${encodeURIComponent(url)}&format=${format}`, '_blank');
-            }
-        });
-        
-        function fetchInfo(url) {
-            loader.style.display = 'block';
-            hideVideoInfo();
-            
-            fetch(`/info?url=${encodeURIComponent(url)}`)
-                .then(response => response.json())
-                .then(data => {
-                    loader.style.display = 'none';
-                    currentData = data;
-                    
-                    if (data.info) {
-                        showVideo(data.info);
-                    }
-                })
-                .catch(() => {
-                    loader.style.display = 'none';
-                    hideVideoInfo();
-                });
-        }
-        
-        function showVideo(info) {
-            document.getElementById('videoTitle').textContent = info.videoDetails.title;
-            
-            const duration = parseInt(info.videoDetails.lengthSeconds);
-            const minutes = Math.floor(duration / 60);
-            const seconds = duration % 60;
-            document.getElementById('videoDuration').textContent = `Duration: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-            
-            document.getElementById('thumbnail').src = info.videoDetails.thumbnails[info.videoDetails.thumbnails.length - 1].url;
-            
-            downloadButtons.innerHTML = '<button class="download-btn" id="downloadBtn">Download Video</button>';
-            document.getElementById('downloadBtn').addEventListener('click', function() {
-                const format = document.querySelector('input[name="format"]:checked').value;
-                window.open(`/download?url=${encodeURIComponent(urlInput.value.trim())}&format=${format}`, '_blank');
-            });
-            
-            videoInfo.style.display = 'block';
-        }
-        
-        function hideVideoInfo() {
-            videoInfo.style.display = 'none';
-            downloadButtons.innerHTML = '<button class="download-btn" id="downloadBtn">Download Video</button>';
-        }
-    </script>
+    <!-- Editorial Brutalist Hero -->
+    <section class="hero-header">
+      <h1>PASTE A LINK.<br><span>TAKE THE MASTER.</span></h1>
+      <div class="hero-specs">
+        <div>MODEL // <b>YT-DECK MK.II</b></div>
+        <div>CONTAINERS // <b>MP4 · MP3 · FLAC · WAV · M4A · SRT</b></div>
+        <div>DSP // <b>CLIP TRIMMER · SPONSORBLOCK · CHAPTER SPLIT</b></div>
+      </div>
+    </section>
+
+    <div class="loader" id="loader" role="status" aria-label="Loading media telemetry"></div>
+
+    <!-- Main Two-Column Deck -->
+    <main class="deck-grid">
+      <!-- Left Column: Input, Inspector, Trimmer, Chapters, Subtitles, Playlist -->
+      <div class="col-left">
+        <div class="input-deck">
+          <div class="section-head">
+            <span><span class="idx">01</span>SOURCE SIGNAL URL</span>
+            <span id="sourceTypeTag">SINGLE / PLAYLIST AUTO-DETECT</span>
+          </div>
+
+          <div class="field">
+            <input
+              type="text"
+              id="urlInput"
+              placeholder="https://www.youtube.com/watch?v=... or playlist link"
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="YouTube link"
+            >
+            <div class="field-actions">
+              <button type="button" class="icon-btn" id="pasteBtn" title="Paste from clipboard">PASTE</button>
+              <button type="button" class="icon-btn" id="clearBtn" aria-label="Clear link">&times;</button>
+            </div>
+          </div>
+
+          <!-- Multi-URL Batch Box -->
+          <div id="batchContainer">
+            <textarea
+              id="batchInput"
+              placeholder="Paste multiple YouTube URLs here (one per line) to batch-queue or package as a single .ZIP..."
+              spellcheck="false"
+            ></textarea>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; gap:8px;">
+              <span style="font-family:var(--mono); font-size:0.74rem; color:var(--mute);" id="batchCountLabel">0 LINKS DETECTED</span>
+              <div style="display:flex; gap:8px;">
+                <button type="button" class="mini-btn" id="batchQueueEachBtn">QUEUE INDIVIDUALLY</button>
+                <button type="button" class="mini-btn active" id="batchZipBtn">DOWNLOAD ALL AS .ZIP</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Playlist / Single Video Mode Switcher Banner -->
+          <div class="playlist-banner" id="playlistBanner">
+            <span id="playlistBannerText">PLAYLIST LINK DETECTED</span>
+            <div style="display:flex; gap:6px;">
+              <button type="button" class="mini-btn active" id="loadPlaylistBtn">PLAYLIST MODE</button>
+              <button type="button" class="mini-btn" id="loadSingleVideoBtn">SINGLE VIDEO ONLY</button>
+            </div>
+          </div>
+
+          <div class="error-banner" id="errorBanner"></div>
+        </div>
+
+        <!-- Single Video Inspector & Interactive Trimmer -->
+        <div class="video-card video-info" id="videoInfo">
+          <div class="section-head" style="margin-bottom:0;">
+            <span><span class="idx">02</span>SIGNAL INSPECTOR &amp; TIMELINE CUTTER</span>
+            <span id="videoIdBadge">ID: ---</span>
+          </div>
+
+          <div class="video-top">
+            <div class="thumb-wrap">
+              <img id="thumbnail" src="" alt="Video thumbnail">
+              <span class="duration-badge" id="videoDuration">0:00</span>
+            </div>
+            <div class="video-meta">
+              <div class="video-title" id="videoTitle"></div>
+              <div class="meta-Chips">
+                <span class="meta-chip" id="videoChannel">CHANNEL</span>
+                <span class="meta-chip" id="videoViews">0 VIEWS</span>
+                <span class="meta-chip" id="videoDate">DATE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Dual-Handle Timeline Trimmer -->
+          <div class="trimmer-box" id="trimmerBox">
+            <div class="trimmer-header">
+              <span class="trim-readout">
+                CUT WINDOW: <b id="trimRangeLabel">FULL LENGTH</b>
+              </span>
+              <button type="button" class="mini-btn" id="resetTrimBtn">RESET FULL</button>
+            </div>
+
+            <div class="range-slider-wrap">
+              <div class="range-track"></div>
+              <div class="range-fill" id="rangeFill"></div>
+              <input type="range" id="trimStartSlider" min="0" max="100" value="0" step="1" aria-label="Clip start time">
+              <input type="range" id="trimEndSlider" min="0" max="100" value="100" step="1" aria-label="Clip end time">
+            </div>
+
+            <div class="trim-inputs">
+              <span>IN:</span>
+              <input type="text" id="clipStartInput" placeholder="00:00" aria-label="Start timestamp">
+              <span>OUT:</span>
+              <input type="text" id="clipEndInput" placeholder="00:00" aria-label="End timestamp">
+              <span style="color:var(--mute); margin-left:auto;" id="clipDurationBadge">DURATION: 100%</span>
+            </div>
+          </div>
+
+          <!-- YouTube Chapters Bar -->
+          <div class="chapters-wrap" id="chaptersWrap">
+            <div class="trimmer-header">
+              <span>CHAPTER MARKERS (CLICK TO ISOLATE CHAPTER CLIP)</span>
+              <span id="chapterCountLabel">0 CHAPTERS</span>
+            </div>
+            <div class="chapter-pills" id="chapterPills"></div>
+          </div>
+
+          <!-- Subtitles & Transcript Extractor Drawer -->
+          <div class="subs-drawer" id="subsDrawer">
+            <div class="trimmer-header">
+              <span>SUBTITLES &amp; CLEAN TRANSCRIPT EXTRACTOR</span>
+              <span id="subsStatusLabel">CAPTIONS READY</span>
+            </div>
+            <div class="subs-controls">
+              <select id="subLangSelect" aria-label="Subtitle language"></select>
+              <button type="button" class="mini-btn" id="loadTranscriptBtn">VIEW TRANSCRIPT</button>
+              <button type="button" class="mini-btn" id="dlSrtBtn">.SRT</button>
+              <button type="button" class="mini-btn" id="dlVttBtn">.VTT</button>
+              <button type="button" class="mini-btn" id="copyTranscriptBtn">COPY TEXT</button>
+            </div>
+            <div class="transcript-box" id="transcriptBox"></div>
+          </div>
+        </div>
+
+        <!-- Playlist Inspector Card -->
+        <div class="playlist-card" id="playlistCard">
+          <div class="section-head" style="margin-bottom:0;">
+            <span><span class="idx">02</span>PLAYLIST DOWNLOADER DECK</span>
+            <span id="playlistCountBadge">0 TRACKS</span>
+          </div>
+
+          <div class="pl-header-row">
+            <div>
+              <div class="video-title" id="playlistTitle">Playlist</div>
+              <div style="font-family:var(--mono); font-size:0.75rem; color:var(--mute); margin-top:2px;" id="playlistUploader"></div>
+            </div>
+            <label class="pl-num-toggle" title="Prefix downloaded files with 01 -, 02 - to preserve playlist order">
+              <input type="checkbox" id="plNumberFiles" checked>
+              <span>[01-99] NUMBER FILES</span>
+            </label>
+          </div>
+
+          <div class="pl-toolbar">
+            <input type="text" id="plSearchInput" placeholder="Filter tracks by title..." spellcheck="false" aria-label="Filter playlist tracks">
+            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+              <button type="button" class="mini-btn" id="plSelectAllBtn">ALL</button>
+              <button type="button" class="mini-btn" id="plSelect10Btn">TOP 10</button>
+              <button type="button" class="mini-btn" id="plSelectNoneBtn">NONE</button>
+            </div>
+          </div>
+
+          <div class="playlist-list" id="playlistList"></div>
+
+          <div class="pl-footer-actions">
+            <span style="font-family:var(--mono); font-size:0.75rem; color:var(--paper); font-weight:700;" id="plSelectedCount">0 SELECTED</span>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="mini-btn" id="plQueueSeparateBtn" title="Download each selected video/audio as a separate file">DOWNLOAD EACH SEPARATELY</button>
+              <button type="button" class="mini-btn active" id="plQueueZipBtn" title="Bundle all selected tracks into a single .ZIP file">DOWNLOAD PLAYLIST (.ZIP)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Smart Format Matrix, Hardware Pro Switches, Master Trigger -->
+      <div class="col-right">
+        <div>
+          <div class="section-head">
+            <span><span class="idx">03</span>FORMAT &amp; CODEC MATRIX</span>
+            <span id="formatTelemetryHint">LIVE STREAM SIZES</span>
+          </div>
+
+          <div class="format-tabs">
+            <button type="button" class="tab-btn active" data-tab="all">ALL</button>
+            <button type="button" class="tab-btn" data-tab="video">VIDEO (MP4)</button>
+            <button type="button" class="tab-btn" data-tab="audio">STUDIO AUDIO</button>
+          </div>
+
+          <fieldset style="border:0;">
+            <div class="formats" id="formatsList">
+              <label class="format" data-cat="video" data-fmt="highest">
+                <input type="radio" name="format" value="highest">
+                <div class="row">
+                  <div class="row-left"><b>BEST</b><small id="tag-highest">Highest available</small></div>
+                  <div class="row-telemetry" id="meta-highest"><span class="badge">AUTO</span></div>
+                </div>
+              </label>
+
+              <label class="format" data-cat="video" data-fmt="2160p">
+                <input type="radio" name="format" value="2160p">
+                <div class="row">
+                  <div class="row-left"><b>2160p</b><small>4K UHD</small></div>
+                  <div class="row-telemetry" id="meta-2160p"><span class="badge">4K</span></div>
+                </div>
+              </label>
+
+              <label class="format" data-cat="video" data-fmt="1440p">
+                <input type="radio" name="format" value="1440p">
+                <div class="row">
+                  <div class="row-left"><b>1440p</b><small>2K QHD</small></div>
+                  <div class="row-telemetry" id="meta-1440p"><span class="badge">2K</span></div>
+                </div>
+              </label>
+
+              <label class="format" data-cat="video" data-fmt="1080p">
+                <input type="radio" name="format" value="1080p">
+                <div class="row">
+                  <div class="row-left"><b>1080p</b><small>Full HD</small></div>
+                  <div class="row-telemetry" id="meta-1080p"><span class="badge">FHD</span></div>
+                </div>
+              </label>
+
+              <label class="format" data-cat="video" data-fmt="720p">
+                <input type="radio" name="format" value="720p" checked>
+                <div class="row">
+                  <div class="row-left"><b>720p</b><small>HD Standard</small></div>
+                  <div class="row-telemetry" id="meta-720p"><span class="badge">HD</span></div>
+                </div>
+              </label>
+
+              <label class="format" data-cat="video" data-fmt="480p">
+                <input type="radio" name="format" value="480p">
+                <div class="row">
+                  <div class="row-left"><b>480p</b><small>Standard</small></div>
+                  <div class="row-telemetry" id="meta-480p"><span class="badge">SD</span></div>
+                </div>
+              </label>
+
+              <label class="format" data-cat="video" data-fmt="360p">
+                <input type="radio" name="format" value="360p">
+                <div class="row">
+                  <div class="row-left"><b>360p</b><small>Smallest file</small></div>
+                  <div class="row-telemetry" id="meta-360p"><span class="badge">LOW</span></div>
+                </div>
+              </label>
+
+              <label class="format" data-cat="audio" data-fmt="mp3">
+                <input type="radio" name="format" value="mp3">
+                <div class="row">
+                  <div class="row-left"><b>MP3</b><small>320kbps Audio</small></div>
+                  <div class="row-telemetry" id="meta-mp3"><span class="badge">LAME</span></div>
+                </div>
+              </label>
+
+              <label class="format" data-cat="audio" data-fmt="m4a">
+                <input type="radio" name="format" value="m4a">
+                <div class="row">
+                  <div class="row-left"><b>M4A</b><small>AAC Studio Audio</small></div>
+                  <div class="row-telemetry" id="meta-m4a"><span class="badge">AAC</span></div>
+                </div>
+              </label>
+
+              <label class="format" data-cat="audio" data-fmt="flac">
+                <input type="radio" name="format" value="flac">
+                <div class="row">
+                  <div class="row-left"><b>FLAC</b><small>Lossless Audio</small></div>
+                  <div class="row-telemetry" id="meta-flac"><span class="badge">LOSSLESS</span></div>
+                </div>
+              </label>
+
+              <label class="format" data-cat="audio" data-fmt="wav">
+                <input type="radio" name="format" value="wav">
+                <div class="row">
+                  <div class="row-left"><b>WAV</b><small>Uncompressed PCM</small></div>
+                  <div class="row-telemetry" id="meta-wav"><span class="badge">PCM 16B</span></div>
+                </div>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+
+        <!-- Pro DSP & Post-Processing Switches -->
+        <div>
+          <div class="section-head">
+            <span><span class="idx">04</span>DSP &amp; CONTAINER PROCESSING</span>
+            <span>POST-MUX PIPELINE</span>
+          </div>
+
+          <div class="dsp-grid">
+            <label class="hw-toggle" title="Strip sponsor reads, intros, and outros via SponsorBlock API">
+              <input type="checkbox" id="optSponsorBlock">
+              <div class="hw-label">
+                <b>SPONSORBLOCK</b>
+                <small>Cut ads &amp; intros</small>
+              </div>
+              <div class="hw-switch"></div>
+            </label>
+
+            <label class="hw-toggle" title="Embed cover art thumbnail and ID3/container tags">
+              <input type="checkbox" id="optEmbedMeta" checked>
+              <div class="hw-label">
+                <b>ID3 + ARTWORK</b>
+                <small>Embed cover &amp; tags</small>
+              </div>
+              <div class="hw-switch"></div>
+            </label>
+
+            <label class="hw-toggle" title="Split video/audio into separate files per chapter and bundle as ZIP">
+              <input type="checkbox" id="optSplitChapters">
+              <div class="hw-label">
+                <b>SPLIT CHAPTERS</b>
+                <small>Export chapter .ZIP</small>
+              </div>
+              <div class="hw-switch"></div>
+            </label>
+
+            <label class="hw-toggle" title="Embed subtitle track inside MP4 container">
+              <input type="checkbox" id="optEmbedSubs">
+              <div class="hw-label">
+                <b>MUX SUBTITLES</b>
+                <small>Soft-subs in MP4</small>
+              </div>
+              <div class="hw-switch"></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Master Execute Button -->
+        <div style="margin-top:auto;">
+          <button id="downloadBtn" type="button">
+            <span>EXTRACT MASTER</span>
+            <span id="chosen">720p</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Live Telemetry Queue Rack -->
+    <section class="queue-section">
+      <div class="section-head">
+        <span><span class="idx">05</span>LIVE TELEMETRY QUEUE (SSE STREAM)</span>
+        <span id="queueActiveCount">0 ACTIVE JOBS</span>
+      </div>
+      <div class="queue-empty" id="queueEmpty">
+        NO ACTIVE TRANSFERS // PASTE A LINK AND PRESS EXTRACT MASTER TO STREAM LIVE TELEMETRY
+      </div>
+      <div class="queue-list" id="queueList"></div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
